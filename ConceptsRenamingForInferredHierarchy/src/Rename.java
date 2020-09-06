@@ -28,7 +28,7 @@ public class Rename {
 
 	
 
-
+ 
 
 public Map<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> from_obsv_to_owlclass(OWLObjectSomeValuesFrom obsv) {
 	num_rg++;

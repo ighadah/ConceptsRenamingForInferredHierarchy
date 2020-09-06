@@ -281,7 +281,7 @@ public OWLOntology classifyOntology(OWLOntology ontology) throws OWLOntologyCrea
 		String filePath= "/Users/ghadahalghamdi/Downloads/MRI_of_lower_limb_simple_example.owl";
 		//String filePath = "/Users/ghadahalghamdi/Documents/testing_examples/testing-renaming-approach/ex-1-o.owl";
 		g.use_rename(filePath);
-		
+		 
 	}
 
 }
