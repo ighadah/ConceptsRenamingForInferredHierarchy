@@ -322,7 +322,7 @@ public class Main {
 									}
 								}
 							}
-						}
+						} 
 						if(rhs_cl.toString().contains("PVS_") && !lhs.toString().contains("PVRG_")) {
 							//System.out.println("the axiom_subof with rhs as PVRG_ and lhs as owlclass is: " + axiom_subof);
 							System.out.println("obsv_owlclasses_map: " + obsv_owlclasses_map);
