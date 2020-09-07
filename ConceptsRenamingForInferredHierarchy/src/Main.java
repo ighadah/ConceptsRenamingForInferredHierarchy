@@ -306,16 +306,36 @@ public class Main {
 						//System.out.println("the current: " + axiom_subof);
 						if(rhs_cl.toString().contains("PVRG_") && !lhs.toString().contains("PVRG_")) {
 							//System.out.println("the axiom_subof with rhs as PVRG_ and lhs as owlclass is: " + axiom_subof);
+							System.out.println("obsv_owlclasses_map: " + obsv_owlclasses_map);
 							for(Map.Entry<OWLObjectSomeValuesFrom, Map<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>>> obsv_owlclasses_entry : obsv_owlclasses_map.entrySet()) {
 								OWLObjectSomeValuesFrom obsv_owlclasses_entry_key = obsv_owlclasses_entry.getKey();
 								Map<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> obsv_owlclasses_entry_values = obsv_owlclasses_entry.getValue();
 								for(Map.Entry<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> g_s_classes_entry : obsv_owlclasses_entry_values.entrySet()) {
 									OWLClass g_s_classes_entry_key = g_s_classes_entry.getKey();
-									//System.out.println("g_s_classes_entry_key: "+ g_s_classes_entry_key);
-									//System.out.println("rhs_cl: " + rhs_cl);
+									System.out.println("g_s_classes_entry_key: "+ g_s_classes_entry_key);
+									System.out.println("rhs_cl: " + rhs_cl);
 									if(g_s_classes_entry_key.toString().equals(rhs_cl.toString())) {
 										OWLSubClassOfAxiom subof_ax_original_name = df.getOWLSubClassOfAxiom(lhs, obsv_owlclasses_entry_key);
 										//System.out.println("the subof_ax_original_name: " + subof_ax_original_name);
+										subofs_with_original_names.add(subof_ax_original_name);
+										manager1.addAxiom(O_classified, subof_ax_original_name);
+									}
+								}
+							}
+						}
+						if(rhs_cl.toString().contains("PVS_") && !lhs.toString().contains("PVRG_")) {
+							//System.out.println("the axiom_subof with rhs as PVRG_ and lhs as owlclass is: " + axiom_subof);
+							System.out.println("obsv_owlclasses_map: " + obsv_owlclasses_map);
+							for(Map.Entry<OWLObjectSomeValuesFrom, Map<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>>> obsv_owlclasses_entry : obsv_owlclasses_map.entrySet()) {
+								OWLObjectSomeValuesFrom obsv_owlclasses_entry_key = obsv_owlclasses_entry.getKey();
+								Map<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> obsv_owlclasses_entry_values = obsv_owlclasses_entry.getValue();
+								for(Map.Entry<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> g_s_classes_entry : obsv_owlclasses_entry_values.entrySet()) {
+									OWLClass g_s_classes_entry_key = g_s_classes_entry.getKey();
+									System.out.println("g_s_classes_entry_key: "+ g_s_classes_entry_key);
+									System.out.println("rhs_cl: " + rhs_cl);
+									if(g_s_classes_entry_key.toString().equals(rhs_cl.toString())) {
+										OWLSubClassOfAxiom subof_ax_original_name = df.getOWLSubClassOfAxiom(lhs, obsv_owlclasses_entry_key);
+										System.out.println("the subof_ax_original_name: " + subof_ax_original_name);
 										subofs_with_original_names.add(subof_ax_original_name);
 										manager1.addAxiom(O_classified, subof_ax_original_name);
 									}
