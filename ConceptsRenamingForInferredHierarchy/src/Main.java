@@ -69,6 +69,7 @@ public class Main {
 		for(OWLAxiom ax: O.getAxioms()) {
 			if(ax.isOfType(AxiomType.EQUIVALENT_CLASSES)) {
 				OWLEquivalentClassesAxiom equiv_ax = (OWLEquivalentClassesAxiom) ax;
+				//System.out.println("the current equiv_ax: " + equiv_ax);
 				Set<OWLSubClassOfAxiom> subof_ax = equiv_ax.asOWLSubClassOfAxioms();
 				for(OWLSubClassOfAxiom subof : subof_ax) {
 					if(!subof.isGCI()) {
@@ -77,13 +78,20 @@ public class Main {
 					
 						Set<OWLClassExpression> lhs_new_conjunct_set = new HashSet<>();
 						if(rhs instanceof OWLObjectIntersectionOf) {
+							//System.out.println("the rhs of equiv is conjunct set");
 							Set<OWLClassExpression> rhs_conjuncts = rhs.asConjunctSet();
 							for(OWLClassExpression rhs_conjunct : rhs_conjuncts) {
 								if(rhs_conjunct instanceof OWLObjectSomeValuesFrom) {
 									OWLObjectSomeValuesFrom obsv = (OWLObjectSomeValuesFrom) rhs_conjunct;
 									
 									Map<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> g_s_classes = re.from_obsv_to_owlclass(obsv);
+									//System.out.println("the resulting map after using re: " + g_s_classes);
+									
+									
 									lhs_new_conjunct_set.addAll(g_s_classes.keySet());
+									
+									
+									
 									Set<OWLClassExpression> g_conjunct_set = new HashSet<>();
 						
 									OWLClass g_class = null;
@@ -96,6 +104,7 @@ public class Main {
 											OWLClass s_class = obsv_s_class_entry.getValue();
 											g_conjunct_set.add(s_class);
 											OWLEquivalentClassesAxiom s_pv_equiv = df.getOWLEquivalentClassesAxiom(s_class, pv);
+											//System.out.println("s_pv_equiv: "+ s_pv_equiv);
 											manager1.addAxiom(O_copy, s_pv_equiv);
 										}
 									}
@@ -104,10 +113,12 @@ public class Main {
 									if(g_conjunct_set.size() > 1) {
 										OWLObjectIntersectionOf g_conjuncts = df.getOWLObjectIntersectionOf(g_conjunct_set);
 										OWLEquivalentClassesAxiom owl_g_equiv = df.getOWLEquivalentClassesAxiom(g_class, g_conjuncts);
+										//System.out.println("owl_g_equiv: where s_classes is more than 1 "+ owl_g_equiv);
 										manager1.addAxiom(O_copy, owl_g_equiv);
 									}else if(g_conjunct_set.size() == 1) {
 										for(OWLClassExpression conjunct: g_conjunct_set) {
 											OWLEquivalentClassesAxiom owl_g_equiv = df.getOWLEquivalentClassesAxiom(g_class, conjunct);
+											//System.out.println("owl_g_equiv: where s_classes equals 1 "+ owl_g_equiv);
 											manager1.addAxiom(O_copy, owl_g_equiv);
 										}
 									}
@@ -118,7 +129,46 @@ public class Main {
 						}
 						//A == B
 						if(rhs instanceof OWLClass) {
+							//System.out.println("the rhs of equiv is owlclass");
 							lhs_new_conjunct_set.add(rhs);
+						}
+						
+						//A <= r some B
+						if(rhs instanceof OWLObjectSomeValuesFrom) {
+							//System.out.println("the rhs of equiv is obsv");
+							//////
+							//lhs_new_conjunct_set.add(rhs);
+							OWLObjectSomeValuesFrom obsv = (OWLObjectSomeValuesFrom) rhs;
+							Map<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> g_s_classes = re.from_obsv_to_owlclass(obsv);
+							lhs_new_conjunct_set.addAll(g_s_classes.keySet());
+							Set<OWLClassExpression> g_conjunct_set = new HashSet<>();
+							OWLClass g_class = null;
+							for(Map.Entry<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> g_s_class: g_s_classes.entrySet()) {
+								g_class = g_s_class.getKey();
+								Map<OWLObjectSomeValuesFrom, OWLClass> obsv_s_class = g_s_class.getValue();
+								for(Map.Entry<OWLObjectSomeValuesFrom, OWLClass> obsv_s_class_entry: obsv_s_class.entrySet()) {
+									OWLObjectSomeValuesFrom pv = obsv_s_class_entry.getKey();
+									OWLClass s_class = obsv_s_class_entry.getValue();
+									g_conjunct_set.add(s_class);
+									OWLEquivalentClassesAxiom s_pv_equiv = df.getOWLEquivalentClassesAxiom(s_class, pv);
+									manager1.addAxiom(O_copy, s_pv_equiv);
+									
+								}
+							}
+							if(g_conjunct_set.size() > 1) {
+								OWLObjectIntersectionOf g_conjuncts = df.getOWLObjectIntersectionOf(g_conjunct_set);
+								OWLEquivalentClassesAxiom owl_g_equiv = df.getOWLEquivalentClassesAxiom(g_class, g_conjuncts);
+								manager1.addAxiom(O_copy, owl_g_equiv);
+							}else if(g_conjunct_set.size() == 1) {
+								for(OWLClassExpression conjunct: g_conjunct_set) {
+									OWLEquivalentClassesAxiom owl_g_equiv = df.getOWLEquivalentClassesAxiom(g_class, conjunct);
+									manager1.addAxiom(O_copy, owl_g_equiv);
+								}
+							}
+							
+							obsv_owlclasses_map.put(obsv, g_s_classes);
+
+							
 						}
 						
 						OWLObjectIntersectionOf owl_conjuncts = df.getOWLObjectIntersectionOf(lhs_new_conjunct_set);
@@ -136,6 +186,7 @@ public class Main {
 					Set<OWLClassExpression> lhs_new_conjunct_set = new HashSet<>();
 					//A <= C
 					if(rhs instanceof OWLObjectIntersectionOf) {
+						//System.out.println("the rhs of subof is conjunct set");
 						Set<OWLClassExpression> rhs_conjuncts = rhs.asConjunctSet();
 						
 						
@@ -180,14 +231,48 @@ public class Main {
 					if(rhs instanceof OWLClass) {
 						lhs_new_conjunct_set.add(rhs);
 					}
-				
+					//A <= r some B
+					if(rhs instanceof OWLObjectSomeValuesFrom) {
+						//System.out.println("the rhs of subof is obsv: " + subof);
+						
+						OWLObjectSomeValuesFrom obsv = (OWLObjectSomeValuesFrom) rhs;
+						Map<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> g_s_classes = re.from_obsv_to_owlclass(obsv);
+						lhs_new_conjunct_set.addAll(g_s_classes.keySet());
+						//System.out.println("the map g_s_classes: " + g_s_classes);
+						Set<OWLClassExpression> g_conjunct_set = new HashSet<>();
+						OWLClass g_class = null;
+						for(Map.Entry<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> g_s_class: g_s_classes.entrySet()) {
+							g_class = g_s_class.getKey();
+							Map<OWLObjectSomeValuesFrom, OWLClass> obsv_s_class = g_s_class.getValue();
+							for(Map.Entry<OWLObjectSomeValuesFrom, OWLClass> obsv_s_class_entry: obsv_s_class.entrySet()) {
+								OWLObjectSomeValuesFrom pv = obsv_s_class_entry.getKey();
+								OWLClass s_class = obsv_s_class_entry.getValue();
+								g_conjunct_set.add(s_class);
+								OWLEquivalentClassesAxiom s_pv_equiv = df.getOWLEquivalentClassesAxiom(s_class, pv);
+								manager1.addAxiom(O_copy, s_pv_equiv);
+								
+							}
+						}
+						if(g_conjunct_set.size() > 1) {
+							OWLObjectIntersectionOf g_conjuncts = df.getOWLObjectIntersectionOf(g_conjunct_set);
+							OWLEquivalentClassesAxiom owl_g_equiv = df.getOWLEquivalentClassesAxiom(g_class, g_conjuncts);
+							manager1.addAxiom(O_copy, owl_g_equiv);
+						}else if(g_conjunct_set.size() == 1) {
+							for(OWLClassExpression conjunct: g_conjunct_set) {
+								OWLEquivalentClassesAxiom owl_g_equiv = df.getOWLEquivalentClassesAxiom(g_class, conjunct);
+								manager1.addAxiom(O_copy, owl_g_equiv);
+							}
+						}
+						obsv_owlclasses_map.put(obsv, g_s_classes);
+
+						
+					}
 					OWLObjectIntersectionOf owl_conjuncts = df.getOWLObjectIntersectionOf(lhs_new_conjunct_set);
 					OWLSubClassOfAxiom owl_subof = df.getOWLSubClassOfAxiom(lhs, owl_conjuncts);
 					
 					new_sub_of_axioms.add(owl_subof);
 					manager1.addAxiom(O_copy, owl_subof);
 				}
-				
 				
 			}
 			
@@ -214,20 +299,23 @@ public class Main {
 					OWLClassExpression lhs = axiom_subof.getSubClass();
 					OWLClassExpression rhs = axiom_subof.getSuperClass();
 					if((!lhs.toString().contains("PVRG_")) && (!rhs.toString().contains("PVRG_"))
-							&& (!rhs.toString().contains("PV_") && (!lhs.toString().contains("PV_")))) {
+							&& (!rhs.toString().contains("PV_")) && (!lhs.toString().contains("PV_")) && (!lhs.toString().contains("PVS_")) && (!rhs.toString().contains("PVS_"))) {
 						manager1.addAxiom(O_classified, axiom_subof);
 					}
 						OWLClass rhs_cl = (OWLClass) rhs;
-						System.out.println("the current: " + axiom_subof);
+						//System.out.println("the current: " + axiom_subof);
 						if(rhs_cl.toString().contains("PVRG_") && !lhs.toString().contains("PVRG_")) {
+							//System.out.println("the axiom_subof with rhs as PVRG_ and lhs as owlclass is: " + axiom_subof);
 							for(Map.Entry<OWLObjectSomeValuesFrom, Map<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>>> obsv_owlclasses_entry : obsv_owlclasses_map.entrySet()) {
 								OWLObjectSomeValuesFrom obsv_owlclasses_entry_key = obsv_owlclasses_entry.getKey();
 								Map<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> obsv_owlclasses_entry_values = obsv_owlclasses_entry.getValue();
 								for(Map.Entry<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> g_s_classes_entry : obsv_owlclasses_entry_values.entrySet()) {
 									OWLClass g_s_classes_entry_key = g_s_classes_entry.getKey();
+									//System.out.println("g_s_classes_entry_key: "+ g_s_classes_entry_key);
+									//System.out.println("rhs_cl: " + rhs_cl);
 									if(g_s_classes_entry_key.toString().equals(rhs_cl.toString())) {
 										OWLSubClassOfAxiom subof_ax_original_name = df.getOWLSubClassOfAxiom(lhs, obsv_owlclasses_entry_key);
-										System.out.println("the subof_ax_original_name: " + subof_ax_original_name);
+										//System.out.println("the subof_ax_original_name: " + subof_ax_original_name);
 										subofs_with_original_names.add(subof_ax_original_name);
 										manager1.addAxiom(O_classified, subof_ax_original_name);
 									}
@@ -278,7 +366,8 @@ public OWLOntology classifyOntology(OWLOntology ontology) throws OWLOntologyCrea
 	
 		Main g = new Main();
 		
-		String filePath= "/Users/ghadahalghamdi/Downloads/MRI_of_lower_limb_simple_example.owl";
+		//String filePath= "/Users/ghadahalghamdi/Downloads/MRI_of_lower_limb_simple_example.owl";
+		String filePath = "/Users/ghadahalghamdi/Documents/testing_examples/testing-renaming-approach/ex-2-transitive-property.owl";
 		//String filePath = "/Users/ghadahalghamdi/Documents/testing_examples/testing-renaming-approach/ex-1-o.owl";
 		g.use_rename(filePath);
 		  

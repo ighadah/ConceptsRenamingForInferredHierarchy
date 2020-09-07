@@ -41,14 +41,16 @@ public Map<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> from_obsv_to_owlcla
 	DefaultPrefixManager dm = new DefaultPrefixManager(pm, sc, "http://snomed.info/id/");
 	
 	
-	String general_obsv_name = "PVRG_" + num_rg;
 	
-	OWLClass cl_general = df.getOWLClass(general_obsv_name, dm);
-	System.out.println("the cl_general: " + cl_general);
 	OWLClassExpression obsv_filler = obsv.getFiller();
 	//rg some (r some B and ...)
 	if(obsv_filler instanceof OWLObjectIntersectionOf) {
-
+		
+		String general_obsv_name = "PVRG_" + num_rg;
+		
+		OWLClass cl_general = df.getOWLClass(general_obsv_name, dm);
+		//System.out.println("the cl_general: " + cl_general);
+		//System.out.println("inside rename class: the filler is: object intersection of");
 		Set<OWLClassExpression> obsv_filler_conjuncts = obsv_filler.asConjunctSet();
 		for(OWLClassExpression obsv_filler_conjunct: obsv_filler_conjuncts) {
 			if(obsv_filler_conjunct instanceof OWLObjectSomeValuesFrom) {
@@ -66,7 +68,12 @@ public Map<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> from_obsv_to_owlcla
 	}
 	//rg some r some B
 	if(obsv_filler instanceof OWLObjectSomeValuesFrom) {
-	
+		String general_obsv_name = "PVRG_" + num_rg;
+		
+		OWLClass cl_general = df.getOWLClass(general_obsv_name, dm);
+		System.out.println("the cl_general: " + cl_general);
+		
+		System.out.println("inside rename class: the filler is: obsv");
 		OWLObjectSomeValuesFrom obsv_pv = (OWLObjectSomeValuesFrom) obsv_filler;
 
 		num_pv++;
@@ -74,6 +81,14 @@ public Map<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> from_obsv_to_owlcla
 		OWLClass cl_specific = df.getOWLClass(specific_obsv_name, dm);
 	
 		pv_s_classes.put(obsv_pv, cl_specific);
+		g_s_classes_map.put(cl_general, pv_s_classes);
+		
+	}
+	if(obsv_filler instanceof OWLClass) {
+		//System.out.println("inside rename class: the filler is: owlclass (simple existential restriction)");
+		String general_obsv_name = "PVS_" + num_rg;
+		OWLClass cl_general = df.getOWLClass(general_obsv_name, dm); 
+		pv_s_classes.put(obsv, cl_general);
 		g_s_classes_map.put(cl_general, pv_s_classes);
 	}
 
