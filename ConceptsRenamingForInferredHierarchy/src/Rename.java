@@ -76,7 +76,7 @@ public Map<OWLClass, Map<OWLObjectSomeValuesFrom, OWLClass>> from_obsv_to_owlcla
 		System.out.println("inside rename class: the filler is: obsv");
 		OWLObjectSomeValuesFrom obsv_pv = (OWLObjectSomeValuesFrom) obsv_filler;
 
-		num_pv++;
+		//num_pv++;
 		String specific_obsv_name = "PV_" + num_rg + "_" + num_pv;
 		OWLClass cl_specific = df.getOWLClass(specific_obsv_name, dm);
 	
